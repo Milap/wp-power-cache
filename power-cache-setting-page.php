@@ -1,6 +1,8 @@
 <?php
 if ( !defined( 'ABSPATH' ) ) exit;
 $active_tab = $_GET['tab'] ?? 'debug_options';
+$wp_power_cache = new WR_Power_Cache();
+$folder_Name = $wp_power_cache->get_cache_folder_path();
 ?>
 <div class="wrap wrpc-admin-wrapper">
     <div class="wrpc-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
@@ -50,7 +52,15 @@ $active_tab = $_GET['tab'] ?? 'debug_options';
                 <h4 style="margin: 0 0 10px 0;">System Info</h4>
                 <p style="font-size: 12px; line-height: 1.5;">
                     <strong>PHP Version:</strong> <?php echo phpversion(); ?><br>
-                    <strong>Directory:</strong> <code>/wp-content/plugins/wp-power-cache/</code>
+                    <strong>Directory:</strong> <code>
+					<?php if(is_dir($folder_Name)) {
+							echo $folder_Name;
+						  }
+						  else {
+							  echo "Not allowed to create this folder, please create manually and set write permission";
+							  echo "Path: $folder_Name";
+						  }
+					?></code>
                 </p>
             </div>
         </div>
