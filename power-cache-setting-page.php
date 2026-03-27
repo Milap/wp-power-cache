@@ -35,6 +35,9 @@ $active_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'debug_options';
         
         <?php if ( $active_tab == 'debug_options' ) : ?>
             
+            <!-- Presets Section -->
+            <?php WRPC_Settings_Presets::render_preset_selector(); ?>
+            
             <form method="post" action="options.php">
                 <?php
                 settings_fields( 'wp-power-cache-group' );
@@ -55,7 +58,9 @@ $active_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'debug_options';
                 </form>
             </div>
 
-        <?php elseif ( $active_tab == 'cache_info' ) : ?>
+        <?php elseif ( $active_tab == 'cache_info' ) : 
+            $stats = $this->cache_manager->get_cache_stats();
+            ?>
 
             <div class="card" style="max-width: 100%; margin-top: 0;">
                 <h3><?php _e( 'Storage Overview', 'wp-power-cache' ); ?></h3>
@@ -69,24 +74,33 @@ $active_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'debug_options';
                     <tbody>
                         <tr>
                             <td><strong><?php _e( 'Total Cache Size', 'wp-power-cache' ); ?></strong></td>
-                            <td><?php echo $this->get_cache_size(); ?></td>
+                            <td><?php echo esc_html( $stats['total_size_formatted'] ); ?></td>
+                        </tr>
+                        <tr>
+                            <td><strong><?php _e( 'Cached Files Count', 'wp-power-cache' ); ?></strong></td>
+                            <td><?php echo intval( $stats['total_files'] ); ?></td>
                         </tr>
                         <tr>
                             <td><strong><?php _e( 'Cache Directory', 'wp-power-cache' ); ?></strong></td>
-                            <td><code><?php echo esc_html( $this->get_cache_folder_path() ); ?></code></td>
+                            <td><code><?php echo esc_html( $stats['cache_dir'] ); ?></code></td>
+                        </tr>
+                        <tr>
+                            <td><strong><?php _e( 'Directory Writable', 'wp-power-cache' ); ?></strong></td>
+                            <td><?php echo $stats['is_writable'] ? '<span style="color: #46b450;">✔ Yes</span>' : '<span style="color: #dc3232;">✘ No</span>'; ?></td>
                         </tr>
                         <tr>
                             <td><strong><?php _e( 'Server Software', 'wp-power-cache' ); ?></strong></td>
-                            <td><?php echo esc_html( $_SERVER['SERVER_SOFTWARE'] ); ?></td>
+                            <td><?php echo esc_html( $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown' ); ?></td>
                         </tr>
                         <tr>
                             <td><strong><?php _e( 'PHP Version', 'wp-power-cache' ); ?></strong></td>
-                            <td><?php echo phpversion(); ?></td>
+                            <td><?php echo esc_html( phpversion() ); ?></td>
                         </tr>
+                    </tbody>
                     </tbody>
                 </table>
                 <p class="description" style="margin-top: 15px;">
-                    <?php _e( 'Note: Static HTML files are stored securely in your plugin directory using a hashed folder name to prevent unauthorized browsing.', 'wp-power-cache' ); ?>
+                    <?php _e( 'Note: Static HTML files are stored securely in your plugin directory using a hashed folder name to prevent unauthorized browsing.', 'wp-power-cache-pro' ); ?>
                 </p>
             </div>
 
