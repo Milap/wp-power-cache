@@ -288,12 +288,43 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
         public function power_cache_menu() {
             add_menu_page('WP Power Cache', 'WP Power Cache', 'manage_options', 'setting-power-cache', array($this, 'power_cache_setting_page'), 'dashicons-performance');
         }
-        
+
+		public function sanitize_settings( $settings ) {
+            if ( !is_array( $settings ) ) {
+                $settings = array();
+            }
+
+            // Handle checkbox fields - set to 0 if not present (unchecked)
+            $checkbox_fields = array( 'developer_flag', 'enable_ttl', 'minify_html', 'enable_logging' );
+            
+            foreach ( $checkbox_fields as $field ) {
+                if ( !isset( $settings[$field] ) ) {
+                    $settings[$field] = 0;
+                } else {
+                    $settings[$field] = intval( $settings[$field] );
+                }
+            }
+            
+            // Sanitize cache_ttl as integer
+            if ( isset( $settings['cache_ttl'] ) ) {
+                $ttl = intval( $settings['cache_ttl'] );
+                $settings['cache_ttl'] = max( 60, $ttl ); // Minimum 60 seconds
+            }
+            
+            // Sanitize excluded_urls as text
+            if ( isset( $settings['excluded_urls'] ) ) {
+                $settings['excluded_urls'] = sanitize_textarea_field( $settings['excluded_urls'] );
+            }
+            
+            return $settings;
+        }
         /**
          * Initializes Settings API sections and fields.
          */
         public function power_cache_init() {
-            register_setting( 'wp-power-cache-group', 'wp_power_cache_settings' );
+            register_setting( 'wp-power-cache-group', 'wp_power_cache_settings', array(
+                'sanitize_callback' => array( $this, 'sanitize_settings' )
+            ) );
             $active_tab = $_GET['tab'] ?? 'debug_options';
             
             if( $active_tab == 'debug_options' ) {
